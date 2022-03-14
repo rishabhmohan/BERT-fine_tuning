@@ -30,7 +30,8 @@ BERT owes its performance to the attention mechanism.
 * BERT encodes context bidirectionally, while due to the autoregressive nature of language models, GPT only looks forward (left-to-right).
 * They can be used for downstream tasks which have very little labeled data
 
-### BERT steps (Use Huggingface’s transformers library) This library lets you import a wide range of transformer-based pre-trained models.
+### BERT steps (Use Huggingface’s transformers library) 
+This library lets you import a wide range of transformer-based pre-trained models.
 1. Split text to train and test , labels and data both
 2. Import Bert model and Bert tokenizer (from transformers import AutoModel, BertTokenizerFast). Output of using tokenizer  is a dictionary of two items
     1. ‘input_ids’ contains the integer sequences of the input sentences. The integers 101 and 102 are special tokens. We add them to both the sequences, and 0 represents the padding token.
