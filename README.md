@@ -30,7 +30,7 @@ BERT owes its performance to the attention mechanism.
 * BERT encodes context bidirectionally, while due to the autoregressive nature of language models, GPT only looks forward (left-to-right).
 * They can be used for downstream tasks which have very little labeled data
 
-BERT steps (Use Huggingface’s transformers library) This library lets you import a wide range of transformer-based pre-trained models.
+### BERT steps (Use Huggingface’s transformers library) This library lets you import a wide range of transformer-based pre-trained models.
 1. Split text to train and test , labels and data both
 2. Import Bert model and Bert tokenizer (from transformers import AutoModel, BertTokenizerFast). Output of using tokenizer  is a dictionary of two items
     1. ‘input_ids’ contains the integer sequences of the input sentences. The integers 101 and 102 are special tokens. We add them to both the sequences, and 0 represents the padding token.
@@ -43,20 +43,24 @@ BERT steps (Use Huggingface’s transformers library) This library lets you impo
 8. Compute class weights for the labels in the train set and then pass these weights to the loss function so that it takes care of the class imbalance.
 9. Fine tune the model meaning train the last layer . Classification tasks such as sentiment analysis are done similarly to Next Sentence classification, by adding a classification layer on top of the Transformer output for the [CLS] token
 
-Hyperparameters
+### Hyperparameters
 1. The max_seq_length specifies the maximum number of tokens of the input. Remember seq_length is max 512 (no of tokens)
 2. batch size The train batch size is a number of samples processed before the model is updated. Our motive is to utilize our resource fully. So, you should set train batch size to maximum value based on the available ram. Could be 32 or 512 etc
 3. masked_lm_prob is the percentage of words that are replaced with a [MASK] token in each sequence. max_predictions_per_seq= (max_seq_length* masked_lm_prob)
 
- Word Masking (as BERT training includes no labeled data so we have to mask 15% of words)
+### Word Masking (as BERT training includes no labeled data so we have to mask 15% of words)
 Training the language model in BERT is done by predicting 15% of the tokens in the input, that were randomly picked. These tokens are pre-processed as follows — 80% are replaced with a “[MASK]” token, 10% with a random word, and 10% use the original word. The intuition that led the authors to pick this approach is as follows (Thanks to Jacob Devlin from Google for the insight):
 * 		If we used [MASK] 100% of the time the model wouldn’t necessarily produce good token representations for non-masked words. The non-masked tokens were still used for context, but the model was optimized for predicting masked words.
 * 		If we used [MASK] 90% of the time and random words 10% of the time, this would teach the model that the observed word is never correct.
 * 		If we used [MASK] 90% of the time and kept the same word 10% of the time, then the model could just trivially copy the non-contextual embedding.
 
 
-The BERT model expects three inputs:
+### The BERT model expects three inputs:
 * 		The input ids — for classification problem, two inputs sentences should be tokenized and concatenated together (please remember about special tokens mentioned above)
 * 		The input masks — allows the model to cleanly differentiate between the content and the padding. The mask has the same shape as the input ids, and contains 1 anywhere the the input ids is not padding.
 * 		The input types (labels) — also has the same shape as the input ids, but inside the non-padded region, it contains 0 or 1 indicating which sentence the token is a part of.
 
+### BERT: From Decoders to Encoders
+- The openAI transformer gave us a fine-tunable pre-trained model based on the Transformer. But something went missing in this transition from LSTMs to Transformers. ELMo’s language model was bi-directional, but the openAI transformer only trains a forward language model. Could we build a transformer-based model whose language model looks both forward and backwards (in the technical jargon – “is conditioned on both left and right context”)? Yes, that’s BERT
+- Finding the right task to train a Transformer stack of encoders is a complex hurdle that BERT resolves by adopting a “masked language model” concept from earlier literature (where it’s called a Cloze task).
+- Beyond masking 15% of the input, BERT also mixes things a bit in order to improve how the model later fine-tunes. Sometimes it randomly replaces a word with another word and asks the model to predict the correct word in that position.
