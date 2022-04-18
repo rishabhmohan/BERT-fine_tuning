@@ -65,3 +65,25 @@ Training the language model in BERT is done by predicting 15% of the tokens in t
 - The openAI transformer gave us a fine-tunable pre-trained model based on the Transformer. But something went missing in this transition from LSTMs to Transformers. ELMo’s language model was bi-directional, but the openAI transformer only trains a forward language model. Could we build a transformer-based model whose language model looks both forward and backwards (in the technical jargon – “is conditioned on both left and right context”)? Yes, that’s BERT
 - Finding the right task to train a Transformer stack of encoders is a complex hurdle that BERT resolves by adopting a “masked language model” concept from earlier literature (where it’s called a Cloze task).
 - Beyond masking 15% of the input, BERT also mixes things a bit in order to improve how the model later fine-tunes. Sometimes it randomly replaces a word with another word and asks the model to predict the correct word in that position.
+
+
+### BERT
+1. The first step is to use the BERT tokenizer to first split the word into tokens. 
+2. Add the special tokens needed for sentence classifications (these are [CLS] at the first position, and [SEP] at the end of the sentence).
+3. Tokenizer replaces each token with its id from the embedding table which is a component we get with the trained model.
+Note that the tokenizer does all these steps in a single line of code:
+tokenized = df['text'].apply((lambda x: tokenizer.encode(x, add_special_tokens=True)))
+
+4. Padding and processsing with BERT:
+input_ids = torch.tensor(np.array(padded))
+with torch.no_grad():
+    last_hidden_states = model(input_ids)
+After running this step, last_hidden_states holds the outputs of DistilBERT. It is a tuple with the shape (number of examples, max number of tokens in the sequence, number of hidden units in the DistilBERT model). In our case, this will be N (no of data points), 66 (which is the number of tokens in the longest sequence from the 2000 examples), 768 (the number of hidden units in the DistilBERT model).
+5. For sentence classification, we’re only only interested in BERT’s output for the [CLS] token, so we select that slice of the cube and discard everything else. Slice the output for the first position for all the sequences, take all hidden unit outputs
+features = last_hidden_states[0][:,0,:].numpy()
+And now features is a 2d numpy array (no of rows * no of hidden units) containing the sentence embeddings of all the sentences in our dataset.
+6. Split data: train_features, test_features, train_labels, test_labels = train_test_split(features, labels)
+7. Next, we train the Logistic Regression model on the training set.
+lr_clf = LogisticRegression()
+lr_clf.fit(train_features, train_labels)
+lr_clf.score(test_features, test_labels)
