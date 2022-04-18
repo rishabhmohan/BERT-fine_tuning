@@ -75,6 +75,7 @@ Note that the tokenizer does all these steps in a single line of code:
 tokenized = df['text'].apply((lambda x: tokenizer.encode(x, add_special_tokens=True)))
 
 4. Padding and processsing with BERT:
+
    ```input_ids = torch.tensor(np.array(padded))
    last_hidden_states = model(input_ids)```
 
