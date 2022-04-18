@@ -75,9 +75,8 @@ Note that the tokenizer does all these steps in a single line of code:
 tokenized = df['text'].apply((lambda x: tokenizer.encode(x, add_special_tokens=True)))
 
 4. Padding and processsing with BERT:
-
    ```input_ids = torch.tensor(np.array(padded))
-   last_hidden_states = model(input_ids)```
+   last_hidden_states = model(input_ids)
 
 5. After running this step, last_hidden_states holds the outputs of DistilBERT. It is a tuple with the shape (number of examples, max number of tokens in      the sequence, number of hidden units in the DistilBERT model). In our case, this will be N (no of data points), 66 (which is the number of tokens in        the longest sequence from the 2000 examples), 768 (the number of hidden units in the DistilBERT model).
 6. For sentence classification, we’re only only interested in BERT’s output for the [CLS] token, so we select that slice of the cube and discard everything else. Slice the output for the first position for all the sequences, take all hidden unit outputs
@@ -90,4 +89,4 @@ And now features is a 2d numpy array (no of rows * no of hidden units) containin
 
 ```lr_clf = LogisticRegression()
 lr_clf.fit(train_features, train_labels)
-lr_clf.score(test_features, test_labels```
+lr_clf.score(test_features, test_labels
